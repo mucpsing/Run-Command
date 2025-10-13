@@ -197,11 +197,12 @@ def run_command_new(
         wait_seconds = pause if pause and isinstance(pause, int) else 3
         command_head = [use_shell, "-c"]
         command_body = " ".join(command)
-        command_end = f"; echo; echo Window Close In {wait_seconds} Ses; sleep {wait_seconds}; exit"
+        command_end = (
+            f"; echo; echo Window Close In {wait_seconds} Ses; read -t {wait_seconds} -n 1 -s -r; exit"  # 超时功能
+        )
 
         # run out side 交互均有外部控制
         _command = command_head + [command_body + command_end]
-        print("_command: ", _command)
         Popen(_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
         return {"success": True}
 
@@ -234,28 +235,14 @@ def run_command_new(
 
 
 if __name__ == "__main__":
-    # res = run_command(["git", "-v"], decode="gb2312", shell=True, pause=True, cwd="i:/SteamLibrary")
+    use_shell = get_shell("bash")
+    command = ["git", "--ver123123sion"]
+    wait_seconds = 3
+    command_head = [use_shell, "-c"]
+    command_body = " ".join(command)
+    command_end = f"; echo; echo Window Close In {wait_seconds} Ses; read -t {wait_seconds} -n 1 -s -r; exit"
 
-    # res = run_command(['npm', 'i', '-D', '@types/node12'], decode='gb2312')
-    # res = subprocess.Popen('start cmd /c \"npm init\"', shell=True)
-    # res = subprocess.Popen('npm -v')
-    # res = subprocess("bash")
-
-    use_shell = get_shell()
-
-    print("use_shell: ", use_shell)
-
-    command = ["git", "--version"]
-    wait_seconds = 10
-    if use_shell == "cmd":
-        command_head = f'start {use_shell} /c "'
-        command_body = " ".join(["git", "--version"])
-        command_end = f' & timeout /t {wait_seconds}"'
-        _command = command_head + command_body + command_end
-
-        subprocess.run(_command)
-
-    if use_shell == "bash":
-        _command = f'"{use_shell}" -c "{" ".join(command)}; echo; echo Window Close In {wait_seconds} Ses; sleep {wait_seconds}; exit"'
-
-        process = subprocess.Popen(_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
+    # run out side 交互均有外部控制
+    _command = command_head + [command_body + command_end]
+    print("_command: ", _command)
+    Popen(_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
