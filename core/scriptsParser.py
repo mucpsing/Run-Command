@@ -89,11 +89,13 @@ def extract_scripts_from_project_file(file_path: str) -> List[str]:
     if not get_project_root:
         return res
 
+    # BUG ParsingError无法解释pdm生成的project.toml文件
     # 先判断是什么项目，当前仅支持python和nodejs
-    project_file = is_python_project(project_path)
-    if not project_file:
-        project_file = is_nodejs_project(project_path)
+    # project_file = is_python_project(project_path)
+    # if not project_file:
+    #     project_file = is_nodejs_project(project_path)
 
+    project_file = is_nodejs_project(project_path)
     if not project_file:
         print("无法识别当前项目类型")
         return res
