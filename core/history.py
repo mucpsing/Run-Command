@@ -11,10 +11,6 @@
 #
 import os
 
-from typing import *
-from dataclasses import *
-from os import path
-
 
 class History:
     def __init__(self, file_path: str, max_count: int = 500, repeat=False):
@@ -51,7 +47,7 @@ class History:
             else:
                 with open(self.file_path, "r", encoding="utf-8") as f:
                     data = f.read().split("\n")
-                    self.data = list(set(data))
+                    self.data = [each for each in data if len(each) > 0]  # 空行过滤
 
             return self
 
@@ -59,22 +55,29 @@ class History:
             print(err)
             raise FileExistsError
 
-    def add(self, histroy: str):
-        if not self.repeat:
-            if histroy in self.data:
-                return self
+    def add(self, new_history: str):
+        # 检查是否允许重复或新记录是否已存在
+        if not self.repeat and new_history in self.data:
+            # 已存在历史记录，将已存在的记录更新到第一行
+            self.data.remove(new_history)
+            self.data.insert(0, new_history)
 
         while len(self.data) > self.max_count:
             self.data.pop()
 
-        self.data.insert(0, histroy)
+        self.data.insert(0, new_history)
         self.dump()
+
         return self
 
     def dump(self):
-        self.data = list(set(self.data))
+        # 空行过滤
+        dump_data = [each for each in self.data if len(each) > 0]
+
+        # 因为set会丢失原来的顺序，这里需要重新排序
+        dump_data = sorted(set(self.data), key=self.data.index)
         with open(self.file_path, "w", encoding="utf-8") as f:
-            f.write("\n".join(self.data))
+            f.write("\n".join(dump_data))
         return self
 
     def __str__(self):
