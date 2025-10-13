@@ -30,12 +30,17 @@ class TRun_command(TypedDict):
     err: Any
 
 
-def get_shell() -> str:
+def get_shell(shell_type: str = None) -> str:
+    """
+    - param shell_type :{str} cmd|bash
+    """
     import shutil
 
-    use_shell = "bash" if shutil.which("bash") or shutil.which("bash.exe") else "cmd"
+    has_bash = shutil.which("bash") or shutil.which("bash.exe")
+    has_cmd = shutil.which("cmd")
+    has_shell_type = shutil.which(shell_type)
 
-    return use_shell
+    return has_shell_type or has_cmd or has_bash
 
 
 def run_command(
@@ -174,9 +179,10 @@ def run_command_new(
     if cwd:
         os.chdir(cwd)
 
-    use_shell = get_shell()
+    use_shell = get_shell(shell_type)
+    print("use_shell: ", use_shell)
 
-    if use_shell == "cmd" and shell:
+    if "cmd" in use_shell and shell:
         command_head = f'start {use_shell} /c "'
         command_body = " ".join(command)
         command_end = ' & pause"' if pause else '"'
@@ -184,10 +190,10 @@ def run_command_new(
             command_end = f' & timeout /t {pause}"'
 
         _command = command_head + command_body + command_end
-        Popen(_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
+        Popen(_command, shell=True)
         return {"success": True}
 
-    if use_shell == "bash" and shell:
+    if "bash" in use_shell and shell:
         wait_seconds = pause if pause and isinstance(pause, int) else 3
         command_head = [use_shell, "-c"]
         command_body = " ".join(command)
@@ -253,20 +259,3 @@ if __name__ == "__main__":
         _command = f'"{use_shell}" -c "{" ".join(command)}; echo; echo Window Close In {wait_seconds} Ses; sleep {wait_seconds}; exit"'
 
         process = subprocess.Popen(_command, creationflags=subprocess.CREATE_NEW_CONSOLE)
-
-    # p = subprocess.Popen(command, shell=True)
-
-    # print("test_cmd: ", test_cmd)
-    # p = subprocess.Popen(
-    #     test_cmd,
-    #     # shell=True,
-    #     text=True,
-    #     stdin=subprocess.PIPE,
-    # )
-
-    # subprocess.run([r"bash.exe", "--login", "-i", "-c", "git --version; sleep 3"])
-    # print(shutil.which("bash"))
-    # print(shutil.which("python.exe"))
-    # print(shutil.which("lua54.exe"))
-    # print(shutil.which("cmd"))
-    # print(shutil.which("powershell"))

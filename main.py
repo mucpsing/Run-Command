@@ -287,6 +287,8 @@ class CpsRunCommandsCommand(sublime_plugin.TextCommand):
         global PANEL_NAME
         global LAST_COMMAND_STR
 
+        shell_type = "cmd"
+
         SETTINGS = sublime.load_settings(DEFAULT_SETTINGS).get(PLUGIN_NAME, {})
         LAST_COMMAND_STR = user_input
         has_open_file = self.view.file_name()
@@ -304,23 +306,25 @@ class CpsRunCommandsCommand(sublime_plugin.TextCommand):
         record_commands = True
         if user_input[0][0] in RUN_IN_NEW_WINDOW_PREFIX:
             run_with_new_window = 30
-
             commands = str(user_input[1:]).split(" ")
+
+            # 使用git指令，尽量采用bash
+            if "$" in user_input[0][0] or commands[0].strip() == "git":
+                # if "$" in user_input[0][0]:
+                shell_type = "bash"
+
+            elif ":" in user_input[0][0]:
+                shell_type = "cmd"
         else:
-            # running in sublime exec
             commands = str(user_input).split(" ")
 
         if record_commands:
             HISTORY.add(user_input)
-            # print("user_input: ", user_input)
-            # print("user_input: ", HISTORY.data[0])
 
-        print("commands: ", commands)
-        print("run_with_new_window: ", run_with_new_window)
-        # res = shell.run_command(
         res = shell.run_command_new(
             commands,
             shell=run_with_new_window,
+            shell_type=shell_type,
             pause=run_with_new_window,
             cwd=work_space,
         )
