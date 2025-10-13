@@ -162,6 +162,7 @@ class CpsRunCommandsCommand(sublime_plugin.TextCommand):
         commands_list = HISTORY.data[0:commands_count]
 
         # TODO: 这里添加一个配置明确脚本是内部调用（阻塞）还是外部执行（调用独立shell）
+        # TODO: 这里需要优化一下指令提示
         # if xxxx:
         #     SCRIPTS_LIST = extract_scripts_from_project_file(self.view.file_name())
         SCRIPTS_LIST = [
