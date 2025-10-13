@@ -4,7 +4,7 @@ import os
 
 from os import path
 from .core import shell
-from .core.typing import Optional, List
+from .core.Type import Optional, List
 from .core.history import History
 
 from .core.scriptsParser import extract_scripts_from_project_file
@@ -312,10 +312,13 @@ class CpsRunCommandsCommand(sublime_plugin.TextCommand):
 
         if record_commands:
             HISTORY.add(user_input)
-            print("user_input: ", user_input)
-            print("user_input: ", HISTORY.data[0])
+            # print("user_input: ", user_input)
+            # print("user_input: ", HISTORY.data[0])
 
-        res = shell.run_command(
+        print("commands: ", commands)
+        print("run_with_new_window: ", run_with_new_window)
+        # res = shell.run_command(
+        res = shell.run_command_new(
             commands,
             shell=run_with_new_window,
             pause=run_with_new_window,
