@@ -134,7 +134,7 @@ def run_command(
 
 
 def run_command_new(
-    command: list,
+    command: str,
     strBuffer: str = None,
     shell: bool = False,
     shell_type: str = "cmd",
@@ -145,7 +145,7 @@ def run_command_new(
     """
     @Description {description}
 
-    - param command   :{list} 通过列表将需要输入的shell命令传入
+    - param command   :{str}  采用字符串，确保命令完整
     - param strBuffer :{str}  需要传输的数据
     - param shell     :{bool} 是否开启一个独立的shell执行指令
     - param shell_type :{str}  使用什么类型的shell，默认cmd，
@@ -180,11 +180,10 @@ def run_command_new(
         os.chdir(cwd)
 
     use_shell = get_shell(shell_type)
-    print("use_shell: ", use_shell)
 
     if "cmd" in use_shell and shell:
         command_head = f'start {use_shell} /c "'
-        command_body = " ".join(command)
+        command_body = command
         command_end = ' & pause"' if pause else '"'
         if isinstance(pause, int):
             command_end = f' & timeout /t {pause}"'
@@ -196,7 +195,7 @@ def run_command_new(
     if "bash" in use_shell and shell:
         wait_seconds = pause if pause and isinstance(pause, int) else 3
         command_head = [use_shell, "-c"]
-        command_body = " ".join(command)
+        command_body = command
         command_end = (
             f"; echo; echo Window Close In {wait_seconds} Ses; read -t {wait_seconds} -n 1 -s -r; exit"  # 超时功能
         )
@@ -207,7 +206,7 @@ def run_command_new(
         return {"success": True}
 
     try:
-        # run with outside
+        # run with inside
         child_process = Popen(command, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
 
         # 过来一遍 strBuffer

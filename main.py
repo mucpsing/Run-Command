@@ -305,22 +305,27 @@ class CpsRunCommandsCommand(sublime_plugin.TextCommand):
 
         # add in histroy commands
         record_commands = True
+        commands = str(user_input.strip())
+
         if user_input[0][0] in RUN_IN_NEW_WINDOW_PREFIX:
+            commands = str(user_input[1:].strip())
             run_with_new_window = 30
-            commands = str(user_input[1:]).split(" ")
+
+            # BUG 不要采用转换，会丢失一些冒号，单引号的格式
+            check_commands = str(user_input[1:]).split(" ")
 
             # 使用git指令，尽量采用bash
-            if "$" in user_input[0][0] or commands[0].strip() == "git":
-                # if "$" in user_input[0][0]:
+            if "$" in user_input[0][0] or check_commands[0].strip() == "git":
                 shell_type = "bash"
 
             elif ":" in user_input[0][0]:
                 shell_type = "cmd"
-        else:
-            commands = str(user_input).split(" ")
 
         if record_commands:
             HISTORY.add(user_input)
+
+        print("commands: ", commands)
+        print("user_input: ", user_input)
 
         res = shell.run_command_new(
             commands,
